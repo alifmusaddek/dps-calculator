@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS Calculator by Alif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .card {
+            background-color: #ffffff;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+        }
+        .form-input {
+            background-color: #f1f5f9;
+            border-color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            background-color: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .toggle-btn-group button {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #d1d5db;
+        }
+        .toggle-btn-group button.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        .toggle-btn-group button:not(.active) {
+            background-color: #ffffff;
+            color: #475569;
+        }
+        .toggle-btn-group button:not(.active):hover {
+            background-color: #f9fafb;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .heart-icon {
+            color: #ef4444;
+            display: inline-block;
+            margin: 0 4px;
+            animation: beat 1.2s infinite cubic-bezier(0.215, 0.610, 0.355, 1);
+        }
+        @keyframes beat {
+            0% { transform: scale(1); } 14% { transform: scale(1.3); } 28% { transform: scale(1); } 42% { transform: scale(1.3); } 70% { transform: scale(1); }
+        }
+        .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;}
+        .modal-content { background-color: #ffffff; padding: 24px; border: 1px solid #e2e8f0; width: 90%; max-width: 400px; border-radius: 12px; text-align: center; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+        .modal-close { color: #9ca3af; position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-close:hover { color: #1f2937; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl mx-auto">
+        <div class="card rounded-2xl p-6 md:p-10">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">DPS Calculator by Alif</h1>
+                <p class="text-gray-500 mt-2">Estimate your savings with simple or compound interest.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+
+                <!-- Input Form -->
+                <div>
+                    <div class="space-y-5">
+                        <div>
+                            <label for="monthly-deposit" class="block text-sm font-medium text-gray-700 mb-2">Monthly Deposit</label>
+                            <input type="number" id="monthly-deposit" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="e.g., 10000" value="10000">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Interest Type</label>
+                            <div id="interest-type-group" class="toggle-btn-group flex">
+                                <button id="interest-simple" class="w-full py-2 px-4 rounded-l-lg">Simple</button>
+                                <button id="interest-compound" class="w-full py-2 px-4 rounded-r-lg">Compound</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="interest-rate" class="block text-sm font-medium text-gray-700 mb-2">Annual Interest Rate (%)</label>
+                            <input type="number" id="interest-rate" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="e.g., 9" value="9">
+                        </div>
+
+                        <div>
+                            <label for="time-period" class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+                            <div class="flex">
+                                <input type="number" id="time-period" class="form-input w-2/3 rounded-l-lg focus:outline-none px-4 py-3" placeholder="e.g., 12" value="12">
+                                <div id="time-unit-group" class="toggle-btn-group flex w-1/3">
+                                    <button id="unit-months" class="w-full py-2 px-2 text-sm rounded-l-none">Months</button>
+                                    <button id="unit-years" class="w-full py-2 px-2 text-sm rounded-r-lg">Years</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                         <button id="calculate-btn" class="btn-primary w-full text-white font-bold py-3 px-4 rounded-lg shadow-sm hover:shadow-md">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Display -->
+                <div class="bg-slate-50 rounded-xl p-6 flex flex-col justify-center">
+                    <div class="space-y-2">
+                         <div class="result-item">
+                            <p class="text-slate-600">Total Investment</p>
+                            <p id="total-investment" class="text-xl font-semibold text-slate-800">BDT 0</p>
+                        </div>
+                         <div class="result-item">
+                            <p class="text-slate-600">Interest Earned</p>
+                            <p id="total-interest" class="text-xl font-semibold text-green-600">BDT 0</p>
+                        </div>
+                        <div class="pt-4">
+                            <p class="text-slate-600 font-medium">Final Maturity Value</p>
+                            <p id="maturity-value" class="text-4xl font-bold text-blue-600 mt-1">BDT 0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-10 pt-6 border-t border-slate-200">
+                <p class="text-gray-500 text-sm">Made with <span class="heart-icon">❤</span> by Alif Musaddek</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert-modal" class="modal"><div class="modal-content relative"><span id="modal-close-btn" class="modal-close">&times;</span><p id="modal-message" class="mt-4 text-lg text-gray-700"></p></div></div>
+
+    <script>
+        // --- DOM Elements ---
+        const monthlyDepositEl = document.getElementById('monthly-deposit');
+        const interestRateEl = document.getElementById('interest-rate');
+        const timePeriodEl = document.getElementById('time-period');
+        const calculateBtn = document.getElementById('calculate-btn');
+
+        // Toggle Buttons
+        const interestTypeGroup = document.getElementById('interest-type-group');
+        const timeUnitGroup = document.getElementById('time-unit-group');
+        const interestSimpleBtn = document.getElementById('interest-simple');
+        const interestCompoundBtn = document.getElementById('interest-compound');
+        const unitMonthsBtn = document.getElementById('unit-months');
+        const unitYearsBtn = document.getElementById('unit-years');
+
+        // Result Display & Modal
+        const totalInvestmentEl = document.getElementById('total-investment');
+        const totalInterestEl = document.getElementById('total-interest');
+        const maturityValueEl = document.getElementById('maturity-value');
+        const alertModal = document.getElementById('alert-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        // --- State Variables ---
+        let interestType = 'simple';
+        let timeUnit = 'months';
+
+        // --- Functions ---
+        function showAlert(message) {
+            modalMessage.textContent = message;
+            alertModal.style.display = 'flex';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'BDT', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount).replace('BDT', 'BDT ');
+        }
+
+        function updateActiveButtons() {
+            interestSimpleBtn.classList.toggle('active', interestType === 'simple');
+            interestCompoundBtn.classList.toggle('active', interestType === 'compound');
+            unitMonthsBtn.classList.toggle('active', timeUnit === 'months');
+            unitYearsBtn.classList.toggle('active', timeUnit === 'years');
+        }
+
+        function calculateMaturity() {
+            const P = parseFloat(monthlyDepositEl.value) || 0;
+            const r = parseFloat(interestRateEl.value) / 100 || 0;
+            const timeValue = parseFloat(timePeriodEl.value) || 0;
+
+            if (P <= 0 || r < 0 || timeValue <= 0) {
+                if (document.body.dataset.loaded) {
+                    showAlert("Please enter valid positive numbers for all fields.");
+                }
+                return;
+            }
+
+            const n = timeUnit === 'years' ? timeValue * 12 : timeValue;
+            let maturityValue = 0;
+            const totalPrincipal = P * n;
+
+            if (interestType === 'simple') {
+                const interestPart1 = P * (n * (n + 1) / 2);
+                const monthlyRate = r / 12;
+                const totalInterest = interestPart1 * monthlyRate;
+                maturityValue = totalPrincipal + totalInterest;
+            } else { // Compound interest
+                const i = r / 12;
+                maturityValue = (i === 0) ? totalPrincipal : P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+            }
+
+            const totalInterest = maturityValue - totalPrincipal;
+
+            totalInvestmentEl.textContent = formatCurrency(totalPrincipal);
+            totalInterestEl.textContent = formatCurrency(totalInterest);
+            maturityValueEl.textContent = formatCurrency(maturityValue);
+        }
+
+        // --- Event Listeners ---
+        calculateBtn.addEventListener('click', calculateMaturity);
+
+        interestTypeGroup.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                interestType = e.target.id.includes('simple') ? 'simple' : 'compound';
+                updateActiveButtons();
+                calculateMaturity();
+            }
+        });
+
+        timeUnitGroup.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                timeUnit = e.target.id.includes('months') ? 'months' : 'years';
+                updateActiveButtons();
+                calculateMaturity();
+            }
+        });
+
+        [monthlyDepositEl, interestRateEl, timePeriodEl].forEach(el => el.addEventListener('input', calculateMaturity));
+        modalCloseBtn.onclick = () => alertModal.style.display = "none";
+        window.onclick = (event) => {
+            if (event.target == alertModal) {
+                alertModal.style.display = "none";
+            }
+        }
+
+        // --- Initial Load ---
+        window.addEventListener('load', () => {
+            updateActiveButtons();
+            calculateMaturity();
+            document.body.dataset.loaded = true;
+        });
+    </script>
+
+</body>
+</html>
